@@ -10,7 +10,7 @@ I test this only on .NET runtime repository yet. No ASP.NET Core, SDK, WinForms,
 I take all commits between two release using `git log --pretty=format:"%aN|%ae" v6.0.0..v7.0.0` command.
 This gives me stream of pair author and email which represent single commit. 
 I then apply mailmap rules to these list of contributors to clean data and normalize contributors.
-Building of mailmap was semiautomatic, I verify each entry and then add it to mailmap file.
+Building of [mailmap](ContributorsMap/mailmap) was semiautomatic, I verify each entry and then add it to mailmap file.
 
 Then I mark all emails with public mail hosting company as `no company`. No-reply emails from GitHub I also count as associtated with persons without company.
 Some emails from well known companies like Ximian, Xamarin, Novell people from then I consider to be Microsoft employees now.
@@ -99,6 +99,20 @@ And then it gives me following picture for .NET runtime repository. I have anoth
 |korporal.at | 5| 0.07%|
 |joniaromaa.fi | 5| 0.07%|
 
+## Start per company commits in FSharp 12 release
+
+| Company | Count | Percentage |
+| ------- | ----: | ---------: |
+|no company | 2059| 80.59%|
+|microsoft.com | 299| 11.70%|
+|jetbrains.com | 70| 2.74%|
+|xs4all.nl | 38| 1.49%|
+|msu-solutions.de | 29| 1.14%|
+|usa.net | 10| 0.39%|
+|tsirpanis.gr | 10| 0.39%|
+|yandex.ru | 7| 0.27%|
+|efbnet.com | 6| 0.23%|
+
 ## Company control
 
 I think that if we exclude contributors without company from the data, then we will have picture of the companies who directly invest in the .NET development.
@@ -181,3 +195,16 @@ That give us much more bleak picture.
 |ayakael.net | 5| 0.10%|
 |korporal.at | 5| 0.10%|
 |joniaromaa.fi | 5| 0.10%|
+
+## Companies contributions for FSharp 12 release
+
+| Company | Count | Percentage |
+| ------- | ----: | ---------: |
+|microsoft.com | 299| 60.28%|
+|jetbrains.com | 70| 14.11%|
+|xs4all.nl | 38| 7.66%|
+|msu-solutions.de | 29| 5.85%|
+|usa.net | 10| 2.02%|
+|tsirpanis.gr | 10| 2.02%|
+|yandex.ru | 7| 1.41%|
+|efbnet.com | 6| 1.21%|

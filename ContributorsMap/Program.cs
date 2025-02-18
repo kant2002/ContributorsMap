@@ -103,7 +103,8 @@ var mailMap = ParseMailMap(fileName);
 
 try
 {
-    var command = await Command.Run("git.exe", ["-C", runtimePath, "log", "--mailmap", "--pretty=format:%aN|%ae", "v8.0.0..v9.0.0"]).Task;
+    var version = args[1];
+    var command = await Command.Run("git.exe", ["-C", runtimePath, "log", "--mailmap", "--pretty=format:%aN|%ae", version]).Task;
     var lines = command.StandardOutput.Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries).ToList();
     lines = lines.Select(_ => mailMap.TryGetValue(_, out var result) ? result : _).ToList();
     //Console.WriteLine($"Total count of commits {lines.Count}");
@@ -150,7 +151,7 @@ void PrintStatsPerCompanyCommits(List<string> lines)
     Console.WriteLine("Start per company commits");
     Console.WriteLine("| Company | Count | Percentage | ");
     Console.WriteLine("| ------- | ----: | ---------: |");
-    var includeWithoutCompanies = true;
+    var includeWithoutCompanies = false;
     var stats = GetStats(lines).Where(_ => includeWithoutCompanies || _.domain != "no company").ToList();
     var totalCount = stats.Sum(_ => _.count);
     foreach (var (domain, count) in stats.GroupBy(_ => _.domain).Select(_ => (_.Key, _.Sum(_ => _.count))).OrderByDescending(_ => _.Item2))
