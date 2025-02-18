@@ -105,9 +105,7 @@ try
 {
     var command = await Command.Run("git.exe", ["-C", runtimePath, "log", "--mailmap", "--pretty=format:%aN|%ae", "v6.0.0..v7.0.0"]).Task;
     var lines = command.StandardOutput.Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries).ToList();
-    var z = lines.Where(_ => _.Contains("Aleksey Kliger")).ToList();
     lines = lines.Select(_ => mailMap.TryGetValue(_, out var result) ? result : _).ToList();
-    z = lines.Where(_ => _.Contains("Aleksey Kliger")).ToList();
     //Console.WriteLine($"Total count of commits {lines.Count}");
     //foreach (var (domain, count) in GetStats(lines).Select(_ => (_.name, _.domain)).Distinct().GroupBy(_ => _.domain).Select(_ => (_.Key, _.Count())).OrderByDescending(_ => _.Item2))
     //{
@@ -143,16 +141,18 @@ string DomainToCompany(string domain)
     if (domain.EndsWith("vcsjones.com")) return "microsoft.com";   
     if (domain.EndsWith("newtonking.com")) return "microsoft.com";
     if (domain.EndsWith("roji.org")) return "microsoft.com";
+    if (domain == "me.com") return "no company";
 
     return domain;
 }
 void PrintStatsPerCompanyCommits(List<string> lines)
 {
     Console.WriteLine("Start per company commits");
-    Console.WriteLine("Company Count");
+    Console.WriteLine("| Company | Count | Percentage | ");
+    Console.WriteLine("| ------- | ----: | ---------: |");
     foreach (var (domain, count) in GetStats(lines).ToList().GroupBy(_ => _.domain).Select(_ => (_.Key, _.Sum(_ => _.count))).OrderByDescending(_ => _.Item2))
     {
-        Console.WriteLine($"{domain} {count}");
+        Console.WriteLine($"|{domain} | {count}| {(double)count/lines.Count:P}|");
     }
 }
 void PrintStatsPerPersonCommits(List<string> lines)
@@ -170,9 +170,9 @@ IEnumerable<(string name, string domain, int count)> GetStats(List<string> lines
     foreach (var s in lines.Order().GroupBy(_ => _))
     {
         var parts = s.Key.Split('|');
-        var (name, domain) = (parts[0], parts[1].Split('@').LastOrDefault());
-        //Console.WriteLine($"{name} {domain} {s.Count()}");
-        yield return (name, DomainToCompany(domain?.ToLower()), s.Count());
+        var email = parts[1];
+        var (name, domain) = (parts[0], email.Split('@').LastOrDefault());
+        yield return (name, DomainToCompany(domain?.ToLower() ?? email), s.Count());
     }
 }
 
