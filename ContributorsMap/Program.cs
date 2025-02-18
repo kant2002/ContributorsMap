@@ -116,6 +116,8 @@ try
     //PrintStatsPerPersonCommits(lines);
     //Console.WriteLine("===================================");
     PrintStatsPerCompanyCommits(lines);
+    //PrintPersonsInCompany(lines, "no-company");
+    //PrintPersonsInCompany(lines, "personal");
     //Console.WriteLine("===================================");
     //PrintSameNames(lines);
     //PrintSameEmails(lines);
@@ -129,6 +131,7 @@ string DomainToCompany(string domain)
 {
     if (firstPartyDomains.TryGetValue(domain, out var score))
     {
+        if (score == 5) return "personal";
         if (score < 6) return "no company";
     }
 
@@ -142,9 +145,19 @@ string DomainToCompany(string domain)
     if (domain.EndsWith("vcsjones.com")) return "microsoft.com";   
     if (domain.EndsWith("newtonking.com")) return "microsoft.com";
     if (domain.EndsWith("roji.org")) return "microsoft.com";
-    if (domain == "me.com") return "no company";
+    if (domain == "me.com") return "personal";
 
     return domain;
+}
+void PrintPersonsInCompany(List<string> lines, string company)
+{
+    Console.WriteLine($"Persons in {company}");
+    Console.WriteLine("| Name | Email | Count |");
+    Console.WriteLine("| ---- | ----- | ----: |");
+    foreach (var (name, domain, count, email) in GetStats(lines).Where(_ => _.domain == company).OrderByDescending(_ => _.count))
+    {
+        Console.WriteLine($"| {name} | {email} | {count} |");
+    }
 }
 void PrintStatsPerCompanyCommits(List<string> lines)
 {
@@ -152,6 +165,7 @@ void PrintStatsPerCompanyCommits(List<string> lines)
     Console.WriteLine("| Company | Count | Percentage | ");
     Console.WriteLine("| ------- | ----: | ---------: |");
     var includeWithoutCompanies = false;
+    PrintPersonsInCompany(lines, "no-company");
     var stats = GetStats(lines).Where(_ => includeWithoutCompanies || _.domain != "no company").ToList();
     var totalCount = stats.Sum(_ => _.count);
     foreach (var (domain, count) in stats.GroupBy(_ => _.domain).Select(_ => (_.Key, _.Sum(_ => _.count))).OrderByDescending(_ => _.Item2))
@@ -163,20 +177,22 @@ void PrintStatsPerPersonCommits(List<string> lines)
 {
     Console.WriteLine("Start per person commits");
     Console.WriteLine("Name Company Count");
-    foreach (var (name, domain, count) in GetStats(lines).OrderByDescending(_ => _.count))
+    foreach (var (name, domain, count, email) in GetStats(lines).OrderByDescending(_ => _.count))
     {
         Console.WriteLine($"{name} {domain} {count}");
     }
 }
 
-IEnumerable<(string name, string domain, int count)> GetStats(List<string> lines)
+IEnumerable<(string name, string domain, int count, string email)> GetStats(List<string> lines)
 {
     foreach (var s in lines.Order().GroupBy(_ => _))
     {
         var parts = s.Key.Split('|');
         var email = parts[1];
         var (name, domain) = (parts[0], email.Split('@').LastOrDefault());
-        yield return (name, DomainToCompany(domain?.ToLower() ?? email), s.Count());
+        if (email.Contains("[bot]")) continue;
+
+        yield return (name, DomainToCompany(domain?.ToLower() ?? email), s.Count(), email);
     }
 }
 
