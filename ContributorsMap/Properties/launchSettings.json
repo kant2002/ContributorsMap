@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ConsoleApp7": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\d\\runtime\\"
+    }
+  }
+}
