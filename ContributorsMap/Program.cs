@@ -96,14 +96,12 @@ Dictionary<string, int> firstPartyDomains = new Dictionary<string, int>()
 };
 
 var runtimePath = args[0];
-//var command = await Command.Run("git.exe", ["-C", runtimePath, "--no-pager", "shortlog", "-sne"]).Task;
-var symbolicLink = runtimePath + ".mailmap";
-var fileName = Path.GetFullPath("mailmap");
-var mailMap = ParseMailMap(fileName);
+var version = args[2];
+var mailmapFileName = Path.GetFullPath(args[1]);
+var mailMap = ParseMailMap(mailmapFileName);
 
 try
 {
-    var version = args[1];
     var command = await Command.Run("git.exe", ["-C", runtimePath, "log", "--mailmap", "--pretty=format:%aN|%ae", version]).Task;
     var lines = command.StandardOutput.Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries).ToList();
     lines = lines.Select(_ => mailMap.TryGetValue(_, out var result) ? result : _).ToList();
@@ -164,9 +162,8 @@ void PrintStatsPerCompanyCommits(List<string> lines)
     Console.WriteLine("Start per company commits");
     Console.WriteLine("| Company | Count | Percentage | ");
     Console.WriteLine("| ------- | ----: | ---------: |");
-    var includeWithoutCompanies = false;
-    PrintPersonsInCompany(lines, "no-company");
-    var stats = GetStats(lines).Where(_ => includeWithoutCompanies || _.domain != "no company").ToList();
+    var includeWithoutCompanies = true;
+    var stats = GetStats(lines).Where(_ => includeWithoutCompanies || (_.domain != "no company" && _.domain != "personal")).ToList();
     var totalCount = stats.Sum(_ => _.count);
     foreach (var (domain, count) in stats.GroupBy(_ => _.domain).Select(_ => (_.Key, _.Sum(_ => _.count))).OrderByDescending(_ => _.Item2))
     {
